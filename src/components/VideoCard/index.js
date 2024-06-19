@@ -2,22 +2,18 @@ import './index.css'
 
 const VideoCard = props => {
   const {video} = props
-  console.log(video)
-  const {
-    title,
-    thumbnailUrl,
-    channel,
-    name,
-    profileImageUrl,
-    viewCount,
-    publishedAt,
-  } = video
+  // console.log(video)
+  const {title, thumbnailUrl, channel, name, viewCount, publishedAt} = video
   return (
     <li>
-      <img alt="video" src={thumbnailUrl} />
+      <img alt="thumb" src={thumbnailUrl} />
+
       <p>{title}</p>
+
+      <p>{viewCount}</p>
     </li>
   )
 }
 
 export default VideoCard
+
