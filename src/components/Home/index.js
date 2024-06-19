@@ -2,7 +2,9 @@ import Cookies from 'js-cookie'
 import {Redirect, Link} from 'react-router-dom'
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
-import {IoMdHome} from 'react-icons/io'
+import {IoMdHome, IoLogoGameControllerB} from 'react-icons/io'
+import {FaFire} from 'react-icons/fa'
+import {RiPlayListAddLine} from 'react-icons/ri'
 import Header from '../Header'
 import VideoCard from '../VideoCard'
 import {LightDarkContainer} from './styledComponents'
@@ -26,8 +28,6 @@ class Home extends Component {
     productsList: [],
     apiStatus: apiStatusConstants.initial,
     activeOptionId: homeOptions[0].id,
-    activeCategoryId: '',
-    searchInput: '',
   }
 
   componentDidMount() {
@@ -48,6 +48,7 @@ class Home extends Component {
       method: 'GET',
     }
     const response = await fetch(apiUrl, options)
+
     if (response.ok) {
       const fetchedData = await response.json()
       const updatedData = fetchedData.videos.map(i => ({
@@ -56,7 +57,7 @@ class Home extends Component {
         thumbnailUrl: i.thumbnail_url,
         channel: i.channel,
         name: i.name,
-        profileImageUrl: i.profile_image_url,
+
         viewCount: i.view_count,
         publishedAt: i.published_at,
       }))
@@ -64,7 +65,7 @@ class Home extends Component {
         productsList: updatedData,
         apiStatus: apiStatusConstants.success,
       })
-      // console.log(updatedData)
+      console.log(fetchedData)
     } else {
       this.setState({
         apiStatus: apiStatusConstants.failure,
@@ -91,12 +92,12 @@ class Home extends Component {
   renderProductsListView = () => {
     const {productsList, activeOptionId} = this.state
     const shouldShowProductsList = productsList.length > 0
-
+    console.log(productsList)
     return shouldShowProductsList ? (
       <div className="all-products-container">
         <ul className="products-list">
           {productsList.map(product => (
-            <VideoCard productData={product} key={product.id} />
+            <VideoCard video={product} key={product.id} />
           ))}
         </ul>
       </div>
@@ -155,16 +156,18 @@ class Home extends Component {
       <LightDarkContainer theme={false ? '#424242' : '#f9f9f9'}>
         <ul>
           <li className="rating-item" key="0" onClick={this.onClickHome}>
+            <IoMdHome />
             <p className="and-up">Home</p>
           </li>
           <li className="rating-item" key="1" onClick={this.onClickTrending}>
+            <FaFire />
             <p className="and-up">Trending</p>
           </li>
           <li className="rating-item" key="2" onClick={this.onClickGaming}>
-            <p className="and-up">Gaming</p>
+            <IoLogoGameControllerB /> <p className="and-up">Gaming</p>
           </li>
           <li className="rating-item" key="3" onClick={this.onClickSaved}>
-            <p className="and-up">Saved Videos</p>
+            <RiPlayListAddLine /> <p className="and-up">Saved Videos</p>
           </li>
         </ul>
         {this.renderAllProducts()}
