@@ -5,6 +5,8 @@ const LanguageContext = React.createContext({
   changeTheme: () => {},
   currentOption: 'Home',
   changeOption: () => {},
+  savedList: [],
+  addToSave: () => {},
 })
 
 export default LanguageContext

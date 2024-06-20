@@ -1,9 +1,12 @@
 import Cookies from 'js-cookie'
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
-import {FaFire} from 'react-icons/fa'
+import {RiPlayListAddLine} from 'react-icons/ri'
+import {AiOutlineDislike, AiOutlineLike} from 'react-icons/ai'
+// import React from 'react'
+import ReactPlayer from 'react-player'
 import Header from '../Header'
-import VideoCard from '../VideoCard'
+// import VideoCard from '../VideoCard'
 import FiltersGroup from '../FiltersGroup'
 import LanguageContext from '../../context/LanguageContext'
 import {LightDarkContainer} from './styledComponents'
@@ -15,9 +18,11 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class Trending extends Component {
+class VideoPlayer extends Component {
   state = {
-    productsList: [],
+    productsList: {},
+    isLike: false,
+    isDisLike: false,
     apiStatus: apiStatusConstants.initial,
   }
 
@@ -30,8 +35,11 @@ class Trending extends Component {
       apiStatus: apiStatusConstants.inProgress,
     })
     const jwtToken = Cookies.get('jwt_token')
+    const {match} = this.props
+    const {params} = match
+    const {id} = params
 
-    const apiUrl = `https://apis.ccbp.in/videos/trending`
+    const apiUrl = `https://apis.ccbp.in/videos/${id}`
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -42,15 +50,18 @@ class Trending extends Component {
 
     if (response.ok) {
       const fetchedData = await response.json()
-      const updatedData = fetchedData.videos.map(i => ({
+      const i = fetchedData.video_details
+      const updatedData = {
         id: i.id,
         title: i.title,
+        videoUrl: i.video_url,
         thumbnailUrl: i.thumbnail_url,
         channel: i.channel,
         name: i.name,
         viewCount: i.view_count,
         publishedAt: i.published_at,
-      }))
+        description: i.description,
+      }
       this.setState({
         productsList: updatedData,
         apiStatus: apiStatusConstants.success,
@@ -79,36 +90,54 @@ class Trending extends Component {
     </div>
   )
 
-  renderProductsListView = () => {
-    const {productsList} = this.state
-    const shouldShowProductsList = productsList.length > 0
-    // console.log(productsList)
-    return shouldShowProductsList ? (
-      <div className="all-products-container">
-        <div>
-          <FaFire />
-          <h1>Trending</h1>
-        </div>
-        <ul className="products-list">
-          {productsList.map(product => (
-            <VideoCard video={product} key={product.id} />
-          ))}
-        </ul>
-      </div>
-    ) : (
-      <div className="no-products-view">
-        <img
-          src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
-          className="no-products-img"
-          alt="no products"
-        />
-        <h1 className="no-products-heading">No Products Found</h1>
-        <p className="no-products-description">
-          We could not find any products. Try other filters.
-        </p>
-      </div>
-    )
-  }
+  renderProductsListView = () => (
+    <LanguageContext.Consumer>
+      {value => {
+        const {productsList} = this.state
+        const shouldShowProductsList = true
+        const {addToSave} = value
+        const onAddToSave = () => {
+          addToSave(productsList)
+        }
+
+        // console.log(productsList)
+        return shouldShowProductsList ? (
+          <div className="all-products-container">
+            <ReactPlayer url={productsList.videoUrl} />
+            <p>{productsList.title}</p>
+            <p>{productsList.viewCount}</p>
+            <p>{productsList.publishedAt}</p>
+            <button type="button">
+              <AiOutlineLike /> Like
+            </button>
+            <button type="button">
+              <AiOutlineDislike /> DisLike
+            </button>
+            <button onClick={onAddToSave} type="button">
+              <RiPlayListAddLine /> Save
+            </button>
+            <hr />
+            <img alt="pr" src={productsList.channel.profile_image_url} />
+            <p>{productsList.channel.name}</p>
+            <p>{productsList.channel.subscriber_count}</p>
+            <p>{productsList.description}</p>
+          </div>
+        ) : (
+          <div className="no-products-view">
+            <img
+              src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
+              className="no-products-img"
+              alt="no products"
+            />
+            <h1 className="no-products-heading">No Products Found</h1>
+            <p className="no-products-description">
+              We could not find any products. Try other filters.
+            </p>
+          </div>
+        )
+      }}
+    </LanguageContext.Consumer>
+  )
 
   renderLoadingView = () => (
     <div className="products-loader-container">
@@ -136,7 +165,6 @@ class Trending extends Component {
       <LanguageContext.Consumer>
         {value => {
           const {isDark} = value
-
           return (
             <LightDarkContainer outline={isDark}>
               <Header />
@@ -152,4 +180,4 @@ class Trending extends Component {
   }
 }
 
-export default Trending
+export default VideoPlayer

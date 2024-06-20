@@ -1,36 +1,42 @@
+import {Link} from 'react-router-dom'
 import LanguageContext from '../../context/LanguageContext'
 import './index.css'
 
 const VideoCard = props => (
   <LanguageContext.Consumer>
     {value => {
-      const {isDark, currentOption} = value
-      const id = currentOption
+      const {currentOption} = value
+
       const {video} = props
       // console.log(video)
-      const {title, thumbnailUrl, channel, name, viewCount, publishedAt} = video
+      const {id, title, thumbnailUrl, channel, viewCount, publishedAt} = video
 
       const renderHomeTrend = () => (
-        <div>
-          <img className="profile" alt="thumb" src={thumbnailUrl} />
-          <img className="prof" alt="pro" src={channel.profile_image_url} />
-          <p>{title}</p>
-          <p>{channel.name}</p>
-          <p>{viewCount}</p>
-        </div>
+        <Link to={`/videos/${id}`}>
+          <div>
+            <img className="profile" alt="thumb" src={thumbnailUrl} />
+            <img className="prof" alt="pro" src={channel.profile_image_url} />
+            <p>{title}</p>
+            <p>{channel.name}</p>
+            <p>{viewCount}</p>
+            <p>{publishedAt}</p>
+          </div>
+        </Link>
       )
 
       const renderGame = () => (
-        <div>
-          <img className="profile" alt="thumb" src={thumbnailUrl} />
+        <Link to={`/videos/${id}`}>
+          <div>
+            <img className="profile" alt="thumb" src={thumbnailUrl} />
 
-          <p>{title}</p>
+            <p>{title}</p>
 
-          <p>{viewCount}</p>
-        </div>
+            <p>{viewCount}</p>
+          </div>
+        </Link>
       )
 
-      const isGame = id === 'Gaming'
+      const isGame = currentOption === 'Gaming'
 
       return (
         <li className="cardItem">

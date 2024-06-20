@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie'
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
-import {FaFire} from 'react-icons/fa'
+import {IoLogoGameControllerB} from 'react-icons/io'
 import Header from '../Header'
 import VideoCard from '../VideoCard'
 import FiltersGroup from '../FiltersGroup'
@@ -15,7 +15,7 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class Trending extends Component {
+class Gaming extends Component {
   state = {
     productsList: [],
     apiStatus: apiStatusConstants.initial,
@@ -31,7 +31,7 @@ class Trending extends Component {
     })
     const jwtToken = Cookies.get('jwt_token')
 
-    const apiUrl = `https://apis.ccbp.in/videos/trending`
+    const apiUrl = `https://apis.ccbp.in/videos/gaming`
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -49,7 +49,6 @@ class Trending extends Component {
         channel: i.channel,
         name: i.name,
         viewCount: i.view_count,
-        publishedAt: i.published_at,
       }))
       this.setState({
         productsList: updatedData,
@@ -86,8 +85,8 @@ class Trending extends Component {
     return shouldShowProductsList ? (
       <div className="all-products-container">
         <div>
-          <FaFire />
-          <h1>Trending</h1>
+          <IoLogoGameControllerB />
+          <h1>Gaming</h1>
         </div>
         <ul className="products-list">
           {productsList.map(product => (
@@ -152,4 +151,4 @@ class Trending extends Component {
   }
 }
 
-export default Trending
+export default Gaming

@@ -7,13 +7,6 @@ import LanguageContext from '../../context/LanguageContext'
 import {LightDarkContainer} from './styledComponents'
 import './index.css'
 
-const homeOptions = [
-  {id: 'all?search=', text: 'Home'},
-  {id: 'trending', text: 'Trending'},
-  {id: 'gaming', text: 'Gaming'},
-  {id: 'saved-videos', text: 'Saved Videos'},
-]
-
 class FiltersGroup extends Component {
   render() {
     return (
@@ -48,7 +41,7 @@ class FiltersGroup extends Component {
                 </li>
 
                 <li onClick={onClickTrend} className="rating-item">
-                  <Link to="/tending">
+                  <Link to="/trending">
                     <FaFire />
                     Trending
                   </Link>
