@@ -1,16 +1,11 @@
 import Cookies from 'js-cookie'
-
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
-
-import {BsSearch} from 'react-icons/bs'
-
 import Header from '../Header'
 import VideoCard from '../VideoCard'
 import FiltersGroup from '../FiltersGroup'
 import LanguageContext from '../../context/LanguageContext'
 import {LightDarkContainer} from './styledComponents'
-import './index.css'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
@@ -19,11 +14,11 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class Home extends Component {
+class Trending extends Component {
   state = {
     productsList: [],
     apiStatus: apiStatusConstants.initial,
-
+    savedList: [],
     searchInput: '',
   }
 
@@ -36,9 +31,8 @@ class Home extends Component {
       apiStatus: apiStatusConstants.inProgress,
     })
     const jwtToken = Cookies.get('jwt_token')
-    const {searchInput} = this.state
 
-    const apiUrl = `https://apis.ccbp.in/videos/all?search=${searchInput}`
+    const apiUrl = `https://apis.ccbp.in/videos/trending`
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -55,7 +49,6 @@ class Home extends Component {
         thumbnailUrl: i.thumbnail_url,
         channel: i.channel,
         name: i.name,
-
         viewCount: i.view_count,
         publishedAt: i.published_at,
       }))
@@ -93,7 +86,6 @@ class Home extends Component {
     // console.log(productsList)
     return shouldShowProductsList ? (
       <div className="all-products-container">
-        {this.renderSearchInput()}
         <ul className="products-list">
           {productsList.map(product => (
             <VideoCard video={product} key={product.id} />
@@ -136,30 +128,6 @@ class Home extends Component {
     }
   }
 
-  onEnterSearchInput = event => {
-    if (event.key === 'Enter') {
-      this.getProducts()
-    }
-  }
-
-  onChangeSearchInput = event => {
-    this.setState({searchInput: event.target.value})
-  }
-
-  renderSearchInput = () => (
-    <div className="search-input-container">
-      <input
-        value={this.searchInput}
-        type="search"
-        className="search-input"
-        placeholder="Search"
-        onChange={this.onChangeSearchInput}
-        onKeyDown={this.onEnterSearchInput}
-      />
-      <BsSearch className="search-icon" />
-    </div>
-  )
-
   render() {
     return (
       <LanguageContext.Consumer>
@@ -181,4 +149,4 @@ class Home extends Component {
   }
 }
 
-export default Home
+export default Trending
