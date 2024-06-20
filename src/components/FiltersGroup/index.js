@@ -36,7 +36,8 @@ class FiltersGroup extends Component {
               <ul>
                 <li onClick={onClickHome} className="rating-item">
                   <Link to="/">
-                    <IoMdHome /> Home
+                    <IoMdHome />
+                    Home
                   </Link>
                 </li>
 
@@ -59,7 +60,7 @@ class FiltersGroup extends Component {
                 </li>
               </ul>
               <div className="bootemCard">
-                <h1>CONTACT US</h1>
+                <p>CONTACT US</p>
                 <div>
                   <img
                     className="imglogo"

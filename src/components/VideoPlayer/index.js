@@ -9,7 +9,7 @@ import Header from '../Header'
 // import VideoCard from '../VideoCard'
 import FiltersGroup from '../FiltersGroup'
 import LanguageContext from '../../context/LanguageContext'
-import {LightDarkContainer} from './styledComponents'
+import {LightDarkContainer, LikeAndDisLike} from './styledComponents'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
@@ -23,6 +23,7 @@ class VideoPlayer extends Component {
     productsList: {},
     isLike: false,
     isDisLike: false,
+
     apiStatus: apiStatusConstants.initial,
   }
 
@@ -57,7 +58,6 @@ class VideoPlayer extends Component {
         videoUrl: i.video_url,
         thumbnailUrl: i.thumbnail_url,
         channel: i.channel,
-        name: i.name,
         viewCount: i.view_count,
         publishedAt: i.published_at,
         description: i.description,
@@ -90,12 +90,21 @@ class VideoPlayer extends Component {
     </div>
   )
 
+  onLike = () => {
+    this.setState({isLike: true, isDisLike: false})
+  }
+
+  onDisLike = () => {
+    this.setState({isDisLike: true, isLike: false})
+  }
+
   renderProductsListView = () => (
     <LanguageContext.Consumer>
       {value => {
-        const {productsList} = this.state
+        const {productsList, isLike, isDisLike} = this.state
         const shouldShowProductsList = true
-        const {addToSave} = value
+        const {addToSave, savedList} = value
+        const ids = savedList.map(i => i.id)
         const onAddToSave = () => {
           addToSave(productsList)
         }
@@ -107,17 +116,29 @@ class VideoPlayer extends Component {
             <p>{productsList.title}</p>
             <p>{productsList.viewCount}</p>
             <p>{productsList.publishedAt}</p>
-            <button type="button">
+            <LikeAndDisLike onClick={this.onLike} outli={isLike} type="button">
               <AiOutlineLike /> Like
-            </button>
-            <button type="button">
+            </LikeAndDisLike>
+            <LikeAndDisLike
+              onClick={this.onDisLike}
+              outli={isDisLike}
+              type="button"
+            >
               <AiOutlineDislike /> DisLike
-            </button>
-            <button onClick={onAddToSave} type="button">
-              <RiPlayListAddLine /> Save
-            </button>
+            </LikeAndDisLike>
+            <LikeAndDisLike
+              outli={ids.includes(productsList.id)}
+              onClick={onAddToSave}
+              type="button"
+            >
+              <RiPlayListAddLine />
+              {ids.includes(productsList.id) ? 'Saved' : 'Save'}
+            </LikeAndDisLike>
             <hr />
-            <img alt="pr" src={productsList.channel.profile_image_url} />
+            <img
+              alt="channel logo"
+              src={productsList.channel.profile_image_url}
+            />
             <p>{productsList.channel.name}</p>
             <p>{productsList.channel.subscriber_count}</p>
             <p>{productsList.description}</p>
@@ -140,7 +161,7 @@ class VideoPlayer extends Component {
   )
 
   renderLoadingView = () => (
-    <div className="products-loader-container">
+    <div data-testid="loader" className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )

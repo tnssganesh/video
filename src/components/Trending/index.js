@@ -7,6 +7,7 @@ import VideoCard from '../VideoCard'
 import FiltersGroup from '../FiltersGroup'
 import LanguageContext from '../../context/LanguageContext'
 import {LightDarkContainer} from './styledComponents'
+import './index.css'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
@@ -98,20 +99,27 @@ class Trending extends Component {
     ) : (
       <div className="no-products-view">
         <img
-          src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
+          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-no-search-results-img.png "
           className="no-products-img"
-          alt="no products"
+          alt="no videos"
         />
-        <h1 className="no-products-heading">No Products Found</h1>
+        <h1 className="no-products-heading">No Search results found</h1>
         <p className="no-products-description">
-          We could not find any products. Try other filters.
+          Try different key words or remove search filter
         </p>
+        <button onClick={this.onRetry} type="button">
+          Retry
+        </button>
       </div>
     )
   }
 
+  onRetry = () => {
+    this.getProducts()
+  }
+
   renderLoadingView = () => (
-    <div className="products-loader-container">
+    <div data-testid="loader" className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
@@ -138,7 +146,7 @@ class Trending extends Component {
           const {isDark} = value
 
           return (
-            <LightDarkContainer outline={isDark}>
+            <LightDarkContainer data-testid="trending" outline={isDark}>
               <Header />
               <div className="homeList">
                 <FiltersGroup />

@@ -17,7 +17,6 @@ const apiStatusConstants = {
 
 class SavedVideo extends Component {
   state = {
-    productsList: [],
     apiStatus: apiStatusConstants.success,
   }
 
@@ -42,13 +41,13 @@ class SavedVideo extends Component {
       {value => {
         const {savedList} = value
         const productsList = savedList
-        const shouldShowProductsList = true
-        console.log()
+        const shouldShowProductsList = savedList.length > 0
+        // console.log()
         return shouldShowProductsList ? (
           <div className="all-products-container">
             <div>
               <FaFire />
-              <h1>Trending</h1>
+              <h1>Saved Videos</h1>
             </div>
             <ul className="products-list">
               {productsList.map(product => (
@@ -59,13 +58,13 @@ class SavedVideo extends Component {
         ) : (
           <div className="no-products-view">
             <img
-              src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
+              src="https://assets.ccbp.in/frontend/react-js/nxt-watch-no-saved-videos-img.png "
               className="no-products-img"
-              alt="no products"
+              alt="no saved videos"
             />
-            <h1 className="no-products-heading">No Products Found</h1>
+            <h1 className="no-products-heading">No saved videos found</h1>
             <p className="no-products-description">
-              We could not find any products. Try other filters.
+              Save your videos by clicking a button
             </p>
           </div>
         )
@@ -98,10 +97,10 @@ class SavedVideo extends Component {
     return (
       <LanguageContext.Consumer>
         {value => {
-          const {isDark, savedList} = value
+          const {isDark} = value
 
           return (
-            <LightDarkContainer outline={isDark}>
+            <LightDarkContainer data-testid="savedVideos" outline={isDark}>
               <Header />
               <div className="homeList">
                 <FiltersGroup />

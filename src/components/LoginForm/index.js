@@ -1,7 +1,7 @@
 import {Component} from 'react'
 import Cookies from 'js-cookie'
 import {Redirect} from 'react-router-dom'
-
+import {LoginButton} from './styledComponents'
 import './index.css'
 
 class LoginForm extends Component {
@@ -9,6 +9,7 @@ class LoginForm extends Component {
     username: '',
     password: '',
     showSubmitError: false,
+    showPassword: false,
     errorMsg: '',
   }
 
@@ -53,14 +54,14 @@ class LoginForm extends Component {
   }
 
   renderPasswordField = () => {
-    const {password} = this.state
+    const {password, showPassword} = this.state
     return (
       <>
         <label className="input-label" htmlFor="password">
           PASSWORD
         </label>
         <input
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           id="password"
           className="password-input-field"
           value={password}
@@ -90,6 +91,10 @@ class LoginForm extends Component {
     )
   }
 
+  onShowPassword = () => {
+    this.setState(pre => ({showPassword: !pre.showPassword}))
+  }
+
   render() {
     const {showSubmitError, errorMsg} = this.state
     const jwtToken = Cookies.get('jwt_token')
@@ -106,10 +111,8 @@ class LoginForm extends Component {
           />
           <div className="input-container">{this.renderUsernameField()}</div>
           <div className="input-container">{this.renderPasswordField()}</div>
-          <button type="submit" className="login-button">
-            Login
-          </button>
-          <input id="pass" type="checkbox" />
+          <LoginButton type="submit">Login</LoginButton>
+          <input onChange={this.onShowPassword} id="pass" type="checkbox" />
           <label htmlFor="pass">Show Password</label>
           {showSubmitError && <p className="error-message">*{errorMsg}</p>}
         </form>

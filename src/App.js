@@ -3,6 +3,7 @@ import {Component} from 'react'
 import LoginForm from './components/LoginForm'
 import Home from './components/Home'
 import Trending from './components/Trending'
+import NotFound from './components/NotFound'
 import Gaming from './components/Gaming'
 import VideoPlayer from './components/VideoPlayer'
 import SavedVideos from './components/SavedVideos'
@@ -26,13 +27,14 @@ class App extends Component {
     this.setState({currentOption: id})
   }
 
-  addToSave = id => {
+  addToSave = item => {
     const {savedList} = this.state
-    if (savedList.includes(id)) {
-      const upList = savedList.filter(i => i.id !== id.id)
+    const savedIds = savedList.map(i => i.id)
+    if (savedIds.includes(item.id)) {
+      const upList = savedList.filter(i => i.id !== item.id)
       this.setState({savedList: upList})
     } else {
-      this.setState(pre => ({savedList: [...pre.savedList, id]}))
+      this.setState(pre => ({savedList: [...pre.savedList, item]}))
     }
   }
 
@@ -57,6 +59,8 @@ class App extends Component {
           <ProtectedRoute exact path="/gaming" component={Gaming} />
           <ProtectedRoute exact path="/saved-videos" component={SavedVideos} />
           <ProtectedRoute exact path="/videos/:id" component={VideoPlayer} />
+          <Route exact path="/not-found" component={NotFound} />
+          <Redirect to="not-found" />
         </Switch>
       </LanguageContext.Provider>
     )

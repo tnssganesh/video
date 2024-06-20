@@ -4,12 +4,12 @@ import {Component} from 'react'
 import Loader from 'react-loader-spinner'
 
 import {BsSearch} from 'react-icons/bs'
-
+import {IoMdClose} from 'react-icons/io'
 import Header from '../Header'
 import VideoCard from '../VideoCard'
 import FiltersGroup from '../FiltersGroup'
 import LanguageContext from '../../context/LanguageContext'
-import {LightDarkContainer} from './styledComponents'
+import {LightDarkContainer, BannerContainer} from './styledComponents'
 import './index.css'
 
 const apiStatusConstants = {
@@ -23,6 +23,7 @@ class Home extends Component {
   state = {
     productsList: [],
     apiStatus: apiStatusConstants.initial,
+    isClose: false,
 
     searchInput: '',
   }
@@ -94,6 +95,7 @@ class Home extends Component {
     return shouldShowProductsList ? (
       <div className="all-products-container">
         {this.renderSearchInput()}
+        {this.renderBanner()}
         <ul className="products-list">
           {productsList.map(product => (
             <VideoCard video={product} key={product.id} />
@@ -103,20 +105,27 @@ class Home extends Component {
     ) : (
       <div className="no-products-view">
         <img
-          src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
+          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-no-search-results-img.png "
           className="no-products-img"
-          alt="no products"
+          alt="no videos"
         />
-        <h1 className="no-products-heading">No Products Found</h1>
+        <h1 className="no-products-heading">No Search results found</h1>
         <p className="no-products-description">
-          We could not find any products. Try other filters.
+          Try different key words or remove search filter
         </p>
+        <button onClick={this.onRetry} type="button">
+          Retry
+        </button>
       </div>
     )
   }
 
+  onRetry = () => {
+    this.getProducts()
+  }
+
   renderLoadingView = () => (
-    <div className="products-loader-container">
+    <div data-testid="loader" className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
@@ -156,9 +165,48 @@ class Home extends Component {
         onChange={this.onChangeSearchInput}
         onKeyDown={this.onEnterSearchInput}
       />
-      <BsSearch className="search-icon" />
+      <button type="button" data-testid="searchButton">
+        <BsSearch className="search-icon" />.
+      </button>
     </div>
   )
+
+  renderBanner = () => {
+    const {isClose} = this.state
+    return (
+      <LanguageContext.Consumer>
+        {value => {
+          const {isDark} = value
+          return (
+            !isClose && (
+              <BannerContainer data-testid="banner">
+                <img
+                  className="website-logo"
+                  src={
+                    isDark
+                      ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
+                      : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
+                  }
+                  alt="nxt watch logo"
+                />
+                <p>Buy Nxt Watch Premium plans</p>
+                <button type="button">GET IT NOW</button>
+                <button
+                  data-testid="close"
+                  onClick={this.coloseClicked}
+                  type="button"
+                >
+                  <IoMdClose />.
+                </button>
+              </BannerContainer>
+            )
+          )
+        }}
+      </LanguageContext.Consumer>
+    )
+  }
+
+  coloseClicked = () => this.setState({isClose: true})
 
   render() {
     return (
@@ -167,10 +215,11 @@ class Home extends Component {
           const {isDark} = value
 
           return (
-            <LightDarkContainer outline={isDark}>
+            <LightDarkContainer data-testid="home" outline={isDark}>
               <Header />
               <div className="homeList">
                 <FiltersGroup />
+
                 {this.renderAllProducts()}
               </div>
             </LightDarkContainer>

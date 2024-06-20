@@ -1,6 +1,7 @@
 import {Link, withRouter} from 'react-router-dom'
 import Cookies from 'js-cookie'
 import {IoMdMoon} from 'react-icons/io'
+import Popup from 'reactjs-popup'
 import {IoSunnyOutline} from 'react-icons/io5'
 import LanguageContext from '../../context/LanguageContext'
 import {LightDarkContainer, LogoutButton} from './styledComponents'
@@ -61,16 +62,14 @@ const Header = props => {
                   </Link>
                   <ul className="nav-menu">
                     <li className="nav-menu-item">
-                      <LogoutButton
-                        color={isDark ? 'white' : '#0967d2'}
-                        bgColor={!isDark ? 'white' : '#424242'}
-                        bdColor={isDark ? '#424242' : 'white'}
+                      <button
+                        data-testid="theme"
                         onClick={onChangeTheme}
                         type="button"
                         className="nav-link"
                       >
                         {isDark ? <IoSunnyOutline /> : <IoMdMoon />}.
-                      </LogoutButton>
+                      </button>
                     </li>
 
                     <li className="nav-menu-item">
@@ -83,16 +82,39 @@ const Header = props => {
                       </Link>
                     </li>
                   </ul>
-                  <LogoutButton
-                    color={isDark ? 'white' : '#0967d2'}
-                    bgColor={!isDark ? 'white' : '#424242'}
-                    bdColor={isDark ? 'white' : '#0967d2'}
-                    type="button"
-                    className="logout-desktop-btn"
-                    onClick={onClickLogout}
-                  >
-                    Logout
-                  </LogoutButton>
+
+                  <div className="popup-container">
+                    <Popup
+                      modal
+                      trigger={
+                        <button type="button" className="logout-desktop-btn">
+                          Logout
+                        </button>
+                      }
+                    >
+                      {close => (
+                        <>
+                          <div className="popupContiner">
+                            <p>Are you sure, you want to logout</p>
+                            <button
+                              type="button"
+                              className="trigger-button"
+                              onClick={() => close()}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              className="logout-desktop-btn"
+                              onClick={onClickLogout}
+                            >
+                              Confirm
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </Popup>
+                  </div>
                 </div>
               </div>
               <div className="nav-menu-mobile">

@@ -62,19 +62,20 @@ class Gaming extends Component {
     }
   }
 
+  retry = () => {
+    this.getProducts()
+  }
+
   renderFailureView = () => (
     <div className="products-error-view-container">
       <img
         src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-products-error-view.png"
-        alt="products failure"
+        alt="failure view"
         className="products-failure-img"
       />
-      <h1 className="product-failure-heading-text">
-        Oops! Something Went Wrong
-      </h1>
-      <p className="products-failure-description">
-        We are having some trouble processing your request. Please try again.
-      </p>
+      <button type="button" onClick={this.retry}>
+        Retry
+      </button>
     </div>
   )
 
@@ -97,16 +98,23 @@ class Gaming extends Component {
     ) : (
       <div className="no-products-view">
         <img
-          src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
+          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-no-search-results-img.png "
           className="no-products-img"
-          alt="no products"
+          alt="no videos"
         />
-        <h1 className="no-products-heading">No Products Found</h1>
+        <h1 className="no-products-heading">No Search results found</h1>
         <p className="no-products-description">
-          We could not find any products. Try other filters.
+          Try different key words or remove search filter
         </p>
+        <button onClick={this.onRetry} type="button">
+          Retry
+        </button>
       </div>
     )
+  }
+
+  onRetry = () => {
+    this.getProducts()
   }
 
   renderLoadingView = () => (
