@@ -64,7 +64,7 @@ class SavedVideo extends Component {
             />
             <h1 className="no-products-heading">No saved videos found</h1>
             <p className="no-products-description">
-              Save your videos by clicking a button
+              You can save your videos while watching them
             </p>
           </div>
         )

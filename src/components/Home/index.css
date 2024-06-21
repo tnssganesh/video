@@ -447,3 +447,9 @@
   display: flex;
   flex-wrap: wrap;
 }
+
+.bannerContainer {
+  background-size: cover;
+
+  background-image: url('https://assets.ccbp.in/frontend/react-js/nxt-watch-banner-bg.png ');
+}

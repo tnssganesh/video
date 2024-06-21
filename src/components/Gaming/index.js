@@ -66,13 +66,21 @@ class Gaming extends Component {
     this.getProducts()
   }
 
-  renderFailureView = () => (
+  renderFailureView = isDark => (
     <div className="products-error-view-container">
       <img
-        src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-products-error-view.png"
+        src={
+          isDark
+            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-dark-theme-img.png'
+            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png'
+        }
         alt="failure view"
         className="products-failure-img"
       />
+      <h1>Oops! Something Went Wrong</h1>
+      <p className="products-failure-description">
+        We are having some trouble processing your request. Please try again.
+      </p>
       <button type="button" onClick={this.retry}>
         Retry
       </button>
@@ -118,19 +126,19 @@ class Gaming extends Component {
   }
 
   renderLoadingView = () => (
-    <div className="products-loader-container">
+    <div data-testid="loader" className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
 
-  renderAllProducts = () => {
+  renderAllProducts = isDark => {
     const {apiStatus} = this.state
 
     switch (apiStatus) {
       case apiStatusConstants.success:
         return this.renderProductsListView()
       case apiStatusConstants.failure:
-        return this.renderFailureView()
+        return this.renderFailureView(isDark)
       case apiStatusConstants.inProgress:
         return this.renderLoadingView()
       default:
@@ -145,11 +153,11 @@ class Gaming extends Component {
           const {isDark} = value
 
           return (
-            <LightDarkContainer outline={isDark}>
+            <LightDarkContainer data-testid="gaming" outline={isDark}>
               <Header />
               <div className="homeList">
                 <FiltersGroup />
-                {this.renderAllProducts()}
+                {this.renderAllProducts(isDark)}
               </div>
             </LightDarkContainer>
           )

@@ -10,6 +10,7 @@ export const HomeListItem = styled.li`
 
 export const BannerContainer = styled.div`
   background-size: cover;
-
-  background-image: url('https://assets.ccbp.in/frontend/react-js/nxt-watch-banner-bg.png ');
+  width: 100%;
+  height: 500px;
+  background-image: url(${props => props.outlin});
 `

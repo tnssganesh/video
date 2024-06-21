@@ -2,6 +2,7 @@ import Cookies from 'js-cookie'
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
 import {RiPlayListAddLine} from 'react-icons/ri'
+import {Link} from 'react-router-dom'
 import {AiOutlineDislike, AiOutlineLike} from 'react-icons/ai'
 // import React from 'react'
 import ReactPlayer from 'react-player'
@@ -74,21 +75,32 @@ class VideoPlayer extends Component {
     }
   }
 
-  renderFailureView = () => (
+  renderFailureView = isDark => (
     <div className="products-error-view-container">
       <img
-        src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-products-error-view.png"
-        alt="products failure"
+        src={
+          isDark
+            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-dark-theme-img.png'
+            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png'
+        }
+        alt="failure view"
         className="products-failure-img"
       />
       <h1 className="product-failure-heading-text">
         Oops! Something Went Wrong
       </h1>
       <p className="products-failure-description">
-        We are having some trouble processing your request. Please try again.
+        We are having some trouble to complete your request. Please try again.
       </p>
+      <button onClick={this.retry} type="button">
+        Retry
+      </button>
     </div>
   )
+
+  retry = () => {
+    this.getProducts()
+  }
 
   onLike = () => {
     this.setState({isLike: true, isDisLike: false})
@@ -166,14 +178,14 @@ class VideoPlayer extends Component {
     </div>
   )
 
-  renderAllProducts = () => {
+  renderAllProducts = isDark => {
     const {apiStatus} = this.state
 
     switch (apiStatus) {
       case apiStatusConstants.success:
         return this.renderProductsListView()
       case apiStatusConstants.failure:
-        return this.renderFailureView()
+        return this.renderFailureView(isDark)
       case apiStatusConstants.inProgress:
         return this.renderLoadingView()
       default:
@@ -187,11 +199,11 @@ class VideoPlayer extends Component {
         {value => {
           const {isDark} = value
           return (
-            <LightDarkContainer outline={isDark}>
+            <LightDarkContainer data-testid="videoItemDetails" outline={isDark}>
               <Header />
               <div className="homeList">
                 <FiltersGroup />
-                {this.renderAllProducts()}
+                {this.renderAllProducts(isDark)}
               </div>
             </LightDarkContainer>
           )

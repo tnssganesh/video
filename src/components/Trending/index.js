@@ -64,11 +64,15 @@ class Trending extends Component {
     }
   }
 
-  renderFailureView = () => (
+  renderFailureView = isDark => (
     <div className="products-error-view-container">
       <img
-        src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-products-error-view.png"
-        alt="products failure"
+        src={
+          isDark
+            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-dark-theme-img.png'
+            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png'
+        }
+        alt="failure view"
         className="products-failure-img"
       />
       <h1 className="product-failure-heading-text">
@@ -77,8 +81,16 @@ class Trending extends Component {
       <p className="products-failure-description">
         We are having some trouble processing your request. Please try again.
       </p>
+
+      <button onClick={this.retry} type="button">
+        Retry
+      </button>
     </div>
   )
+
+  retry = () => {
+    this.getProducts()
+  }
 
   renderProductsListView = () => {
     const {productsList} = this.state
@@ -124,14 +136,14 @@ class Trending extends Component {
     </div>
   )
 
-  renderAllProducts = () => {
+  renderAllProducts = isDark => {
     const {apiStatus} = this.state
 
     switch (apiStatus) {
       case apiStatusConstants.success:
         return this.renderProductsListView()
       case apiStatusConstants.failure:
-        return this.renderFailureView()
+        return this.renderFailureView(isDark)
       case apiStatusConstants.inProgress:
         return this.renderLoadingView()
       default:

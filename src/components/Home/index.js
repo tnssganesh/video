@@ -72,11 +72,15 @@ class Home extends Component {
     }
   }
 
-  renderFailureView = () => (
+  renderFailureView = isDark => (
     <div className="products-error-view-container">
       <img
-        src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-products-error-view.png"
-        alt="products failure"
+        src={
+          isDark
+            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-dark-theme-img.png'
+            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png'
+        }
+        alt="failure view"
         className="products-failure-img"
       />
       <h1 className="product-failure-heading-text">
@@ -85,8 +89,16 @@ class Home extends Component {
       <p className="products-failure-description">
         We are having some trouble processing your request. Please try again.
       </p>
+
+      <button onClick={this.retry} type="button">
+        Retry
+      </button>
     </div>
   )
+
+  retry = () => {
+    this.getProducts()
+  }
 
   renderProductsListView = () => {
     const {productsList} = this.state
@@ -95,7 +107,7 @@ class Home extends Component {
     return shouldShowProductsList ? (
       <div className="all-products-container">
         {this.renderSearchInput()}
-        {this.renderBanner()}
+
         <ul className="products-list">
           {productsList.map(product => (
             <VideoCard video={product} key={product.id} />
@@ -130,14 +142,14 @@ class Home extends Component {
     </div>
   )
 
-  renderAllProducts = () => {
+  renderAllProducts = isDark => {
     const {apiStatus} = this.state
 
     switch (apiStatus) {
       case apiStatusConstants.success:
         return this.renderProductsListView()
       case apiStatusConstants.failure:
-        return this.renderFailureView()
+        return this.renderFailureView(isDark)
       case apiStatusConstants.inProgress:
         return this.renderLoadingView()
       default:
@@ -165,44 +177,48 @@ class Home extends Component {
         onChange={this.onChangeSearchInput}
         onKeyDown={this.onEnterSearchInput}
       />
-      <button type="button" data-testid="searchButton">
+      <button
+        onClick={this.searchVideo}
+        type="button"
+        data-testid="searchButton"
+      >
         <BsSearch className="search-icon" />.
       </button>
     </div>
   )
 
+  searchVideo = () => {
+    this.getProducts()
+  }
+
   renderBanner = () => {
     const {isClose} = this.state
     return (
-      <LanguageContext.Consumer>
-        {value => {
-          const {isDark} = value
-          return (
-            !isClose && (
-              <BannerContainer data-testid="banner">
-                <img
-                  className="website-logo"
-                  src={
-                    isDark
-                      ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
-                      : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
-                  }
-                  alt="nxt watch logo"
-                />
-                <p>Buy Nxt Watch Premium plans</p>
-                <button type="button">GET IT NOW</button>
-                <button
-                  data-testid="close"
-                  onClick={this.coloseClicked}
-                  type="button"
-                >
-                  <IoMdClose />.
-                </button>
-              </BannerContainer>
-            )
-          )
-        }}
-      </LanguageContext.Consumer>
+      !isClose && (
+        <BannerContainer
+          data-testid="banner"
+          outlin="https://assets.ccbp.in/frontend/react-js/nxt-watch-banner-bg.png"
+        >
+          <img
+            className="website-logo"
+            src={
+              false
+                ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
+                : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
+            }
+            alt="nxt watch logo"
+          />
+          <p>Buy Nxt Watch Premium plans</p>
+          <button type="button">GET IT NOW</button>
+          <button
+            data-testid="close"
+            onClick={this.coloseClicked}
+            type="button"
+          >
+            <IoMdClose />.
+          </button>
+        </BannerContainer>
+      )
     )
   }
 
@@ -219,8 +235,10 @@ class Home extends Component {
               <Header />
               <div className="homeList">
                 <FiltersGroup />
-
-                {this.renderAllProducts()}
+                <div>
+                  {this.renderBanner()}
+                  {this.renderAllProducts(isDark)}
+                </div>
               </div>
             </LightDarkContainer>
           )
