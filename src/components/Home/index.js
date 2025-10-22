@@ -4,7 +4,17 @@ import {Component} from 'react'
 import Loader from 'react-loader-spinner'
 
 import {BsSearch} from 'react-icons/bs'
-	@@ -19,25 +19,17 @@ const apiStatusConstants = {
+import {IoMdClose} from 'react-icons/io'
+import Header from '../Header'
+import VideoCard from '../VideoCard'
+import FiltersGroup from '../FiltersGroup'
+import LanguageContext from '../../context/LanguageContext'
+import {LightDarkContainer, BannerContainer} from './styledComponents'
+import './index.css'
+const apiStatusConstants = {
+  initial: 'INITIAL',
+  success: 'SUCCESS',
+  failure: 'FAILURE',
   inProgress: 'IN_PROGRESS',
 }
 
@@ -30,7 +40,17 @@ class Home extends Component {
 
     const apiUrl = `https://apis.ccbp.in/videos/all?search=${searchInput}`
     const options = {
-	@@ -56,23 +48,25 @@ class Home extends Component {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      method: 'GET',
+    }
+    const response = await fetch(apiUrl, options)
+    if (response.ok) {
+      const fetchedData = await response.json()
+      const updatedData = fetchedData.videos.map(i => ({
+        id: i.id,
+        title: i.title,
         thumbnailUrl: i.thumbnail_url,
         channel: i.channel,
         name: i.name,
@@ -54,7 +74,17 @@ class Home extends Component {
     <div className="products-error-view-container">
       <img
         src={
-	@@ -90,23 +84,17 @@ class Home extends Component {
+          isDark
+            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-dark-theme-img.png'
+            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png'
+        }
+        alt="failure view"
+        className="products-failure-img"
+      />
+      <h1 className="product-failure-heading-text">
+        Oops! Something Went Wrong
+      </h1>
+      <p className="products-failure-description">
         We are having some trouble processing your request. Please try again.
       </p>
 
@@ -78,7 +108,18 @@ class Home extends Component {
 
         <ul className="products-list">
           {productsList.map(product => (
-	@@ -125,60 +113,58 @@ class Home extends Component {
+            <VideoCard video={product} key={product.id} />
+          ))}
+        </ul>
+      </div>
+    ) : (
+      <div className="no-products-view">
+        <img
+          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-no-search-results-img.png "
+          className="no-products-img"
+          alt="no videos"
+        />
+        <h1 className="no-products-heading">No Search results found</h1>
         <p className="no-products-description">
           Try different key words or remove search filter
         </p>
@@ -139,7 +180,8 @@ class Home extends Component {
         type="button"
         data-testid="searchButton"
       >
-	@@ -187,65 +173,48 @@ class Home extends Component {
+        <BsSearch className="search-icon" />.
+      </button>
     </div>
   )
 
