@@ -11,7 +11,11 @@ import Header from '../Header'
 import FiltersGroup from '../FiltersGroup'
 import LanguageContext from '../../context/LanguageContext'
 import {LightDarkContainer, LikeAndDisLike} from './styledComponents'
-	@@ -19,27 +16,20 @@ const apiStatusConstants = {
+
+const apiStatusConstants = {
+  initial: 'INITIAL',
+  success: 'SUCCESS',
+  failure: 'FAILURE',
   inProgress: 'IN_PROGRESS',
 }
 
@@ -39,7 +43,23 @@ class VideoPlayer extends Component {
 
     const apiUrl = `https://apis.ccbp.in/videos/${id}`
     const options = {
-	@@ -63,19 +53,32 @@ class VideoPlayer extends Component {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      method: 'GET',
+    }
+    const response = await fetch(apiUrl, options)
+
+    if (response.ok) {
+      const fetchedData = await response.json()
+      const i = fetchedData.video_details
+      const updatedData = {
+        id: i.id,
+        title: i.title,
+        videoUrl: i.video_url,
+        thumbnailUrl: i.thumbnail_url,
+        channel: i.channel,
+        viewCount: i.view_count,
         publishedAt: i.published_at,
         description: i.description,
       }
@@ -59,7 +79,16 @@ class VideoPlayer extends Component {
     <div className="products-error-view-container">
       <img
         src={
-	@@ -92,125 +95,82 @@ class VideoPlayer extends Component {
+          isDark
+            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-dark-theme-img.png'
+            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png'
+        }
+        alt="failure view"
+        className="products-failure-img"
+      />
+      <h1 className="product-failure-heading-text">
+        Oops! Something Went Wrong
+      </h1>
       <p className="products-failure-description">
         We are having some trouble to complete your request. Please try again.
       </p>
@@ -79,3 +108,109 @@ class VideoPlayer extends Component {
 
   onDisLike = () => {
     this.setState({isDisLike: true, isLike: false})
+  }
+
+  renderProductsListView = () => (
+    <LanguageContext.Consumer>
+      {value => {
+        const {productsList, isLike, isDisLike} = this.state
+        const shouldShowProductsList = true
+        const {addToSave, savedList} = value
+        const ids = savedList.map(i => i.id)
+        const onAddToSave = () => {
+          addToSave(productsList)
+        }
+
+        // console.log(productsList)
+        return shouldShowProductsList ? (
+          <div className="all-products-container">
+            <ReactPlayer url={productsList.videoUrl} />
+            <p>{productsList.title}</p>
+            <p>{productsList.viewCount}</p>
+            <p>{productsList.publishedAt}</p>
+            <LikeAndDisLike onClick={this.onLike} outli={isLike} type="button">
+              <AiOutlineLike /> Like
+            </LikeAndDisLike>
+            <LikeAndDisLike
+              onClick={this.onDisLike}
+              outli={isDisLike}
+              type="button"
+            >
+              <AiOutlineDislike /> DisLike
+            </LikeAndDisLike>
+            <LikeAndDisLike
+              outli={ids.includes(productsList.id)}
+              onClick={onAddToSave}
+              type="button"
+            >
+              <RiPlayListAddLine />
+              {ids.includes(productsList.id) ? 'Saved' : 'Save'}
+            </LikeAndDisLike>
+            <hr />
+            <img
+              alt="channel logo"
+              src={productsList.channel.profile_image_url}
+            />
+            <p>{productsList.channel.name}</p>
+            <p>{productsList.channel.subscriber_count}</p>
+            <p>{productsList.description}</p>
+          </div>
+        ) : (
+          <div className="no-products-view">
+            <img
+              src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
+              className="no-products-img"
+              alt="no products"
+            />
+            <h1 className="no-products-heading">No Products Found</h1>
+            <p className="no-products-description">
+              We could not find any products. Try other filters.
+            </p>
+          </div>
+        )
+      }}
+    </LanguageContext.Consumer>
+  )
+
+  renderLoadingView = () => (
+    <div data-testid="loader" className="products-loader-container">
+      <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
+    </div>
+  )
+
+  renderAllProducts = isDark => {
+    const {apiStatus} = this.state
+
+    switch (apiStatus) {
+      case apiStatusConstants.success:
+        return this.renderProductsListView()
+      case apiStatusConstants.failure:
+        return this.renderFailureView(isDark)
+      case apiStatusConstants.inProgress:
+        return this.renderLoadingView()
+      default:
+        return null
+    }
+  }
+
+  render() {
+    return (
+      <LanguageContext.Consumer>
+        {value => {
+          const {isDark} = value
+          return (
+            <LightDarkContainer data-testid="videoItemDetails" outline={isDark}>
+              <Header />
+              <div className="homeList">
+                <FiltersGroup />
+                {this.renderAllProducts(isDark)}
+              </div>
+            </LightDarkContainer>
+          )
+        }}
+      </LanguageContext.Consumer>
+    )
+  }
+}
+
+export default VideoPlayer
