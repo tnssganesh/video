@@ -1,13 +1,10 @@
 import Cookies from 'js-cookie'
-import {Component} from 'react'
+import {useState, useEffect, useCallback, useContext} from 'react'
 import Loader from 'react-loader-spinner'
 import {RiPlayListAddLine} from 'react-icons/ri'
-import {Link} from 'react-router-dom'
 import {AiOutlineDislike, AiOutlineLike} from 'react-icons/ai'
-// import React from 'react'
 import ReactPlayer from 'react-player'
 import Header from '../Header'
-// import VideoCard from '../VideoCard'
 import FiltersGroup from '../FiltersGroup'
 import LanguageContext from '../../context/LanguageContext'
 import {LightDarkContainer, LikeAndDisLike} from './styledComponents'
@@ -19,27 +16,20 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class VideoPlayer extends Component {
-  state = {
-    productsList: {},
-    isLike: false,
-    isDisLike: false,
+const VideoPlayer = props => {
+  const {isDark, addToSave, savedList} = useContext(LanguageContext)
+  const {match} = props
+  const {params} = match
+  const {id} = params
+  
+  const [productsList, setProductsList] = useState({})
+  const [isLike, setIsLike] = useState(false)
+  const [isDisLike, setIsDisLike] = useState(false)
+  const [apiStatus, setApiStatus] = useState(apiStatusConstants.initial)
 
-    apiStatus: apiStatusConstants.initial,
-  }
-
-  componentDidMount() {
-    this.getProducts()
-  }
-
-  getProducts = async () => {
-    this.setState({
-      apiStatus: apiStatusConstants.inProgress,
-    })
+  const getProducts = useCallback(async () => {
+    setApiStatus(apiStatusConstants.inProgress)
     const jwtToken = Cookies.get('jwt_token')
-    const {match} = this.props
-    const {params} = match
-    const {id} = params
 
     const apiUrl = `https://apis.ccbp.in/videos/${id}`
     const options = {
@@ -63,19 +53,32 @@ class VideoPlayer extends Component {
         publishedAt: i.published_at,
         description: i.description,
       }
-      this.setState({
-        productsList: updatedData,
-        apiStatus: apiStatusConstants.success,
-      })
-      // console.log(fetchedData)
+      setProductsList(updatedData)
+      setApiStatus(apiStatusConstants.success)
     } else {
-      this.setState({
-        apiStatus: apiStatusConstants.failure,
-      })
+      setApiStatus(apiStatusConstants.failure)
     }
+  }, [id])
+
+  useEffect(() => {
+    getProducts()
+  }, [getProducts])
+
+  const retry = () => {
+    getProducts()
   }
 
-  renderFailureView = isDark => (
+  const onLike = () => {
+    setIsLike(true)
+    setIsDisLike(false)
+  }
+
+  const onDisLike = () => {
+    setIsDisLike(true)
+    setIsLike(false)
+  }
+
+  const renderFailureView = () => (
     <div className="products-error-view-container">
       <img
         src={
@@ -92,125 +95,82 @@ class VideoPlayer extends Component {
       <p className="products-failure-description">
         We are having some trouble to complete your request. Please try again.
       </p>
-      <button onClick={this.retry} type="button">
+      <button onClick={retry} type="button">
         Retry
       </button>
     </div>
   )
 
-  retry = () => {
-    this.getProducts()
+  const renderProductsListView = () => {
+    const ids = savedList.map(i => i.id)
+    const onAddToSave = () => {
+      addToSave(productsList)
+    }
+
+    return (
+      <div className="all-products-container">
+        <ReactPlayer url={productsList.videoUrl} />
+        <p>{productsList.title}</p>
+        <p>{productsList.viewCount}</p>
+        <p>{productsList.publishedAt}</p>
+        <LikeAndDisLike onClick={onLike} outli={isLike} type="button">
+          <AiOutlineLike /> Like
+        </LikeAndDisLike>
+        <LikeAndDisLike
+          onClick={onDisLike}
+          outli={isDisLike}
+          type="button"
+        >
+          <AiOutlineDislike /> DisLike
+        </LikeAndDisLike>
+        <LikeAndDisLike
+          outli={ids.includes(productsList.id)}
+          onClick={onAddToSave}
+          type="button"
+        >
+          <RiPlayListAddLine />
+          {ids.includes(productsList.id) ? 'Saved' : 'Save'}
+        </LikeAndDisLike>
+        <hr />
+        <img
+          alt="channel logo"
+          src={productsList.channel.profile_image_url}
+        />
+        <p>{productsList.channel.name}</p>
+        <p>{productsList.channel.subscriber_count}</p>
+        <p>{productsList.description}</p>
+      </div>
+    )
   }
 
-  onLike = () => {
-    this.setState({isLike: true, isDisLike: false})
-  }
-
-  onDisLike = () => {
-    this.setState({isDisLike: true, isLike: false})
-  }
-
-  renderProductsListView = () => (
-    <LanguageContext.Consumer>
-      {value => {
-        const {productsList, isLike, isDisLike} = this.state
-        const shouldShowProductsList = true
-        const {addToSave, savedList} = value
-        const ids = savedList.map(i => i.id)
-        const onAddToSave = () => {
-          addToSave(productsList)
-        }
-
-        // console.log(productsList)
-        return shouldShowProductsList ? (
-          <div className="all-products-container">
-            <ReactPlayer url={productsList.videoUrl} />
-            <p>{productsList.title}</p>
-            <p>{productsList.viewCount}</p>
-            <p>{productsList.publishedAt}</p>
-            <LikeAndDisLike onClick={this.onLike} outli={isLike} type="button">
-              <AiOutlineLike /> Like
-            </LikeAndDisLike>
-            <LikeAndDisLike
-              onClick={this.onDisLike}
-              outli={isDisLike}
-              type="button"
-            >
-              <AiOutlineDislike /> DisLike
-            </LikeAndDisLike>
-            <LikeAndDisLike
-              outli={ids.includes(productsList.id)}
-              onClick={onAddToSave}
-              type="button"
-            >
-              <RiPlayListAddLine />
-              {ids.includes(productsList.id) ? 'Saved' : 'Save'}
-            </LikeAndDisLike>
-            <hr />
-            <img
-              alt="channel logo"
-              src={productsList.channel.profile_image_url}
-            />
-            <p>{productsList.channel.name}</p>
-            <p>{productsList.channel.subscriber_count}</p>
-            <p>{productsList.description}</p>
-          </div>
-        ) : (
-          <div className="no-products-view">
-            <img
-              src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
-              className="no-products-img"
-              alt="no products"
-            />
-            <h1 className="no-products-heading">No Products Found</h1>
-            <p className="no-products-description">
-              We could not find any products. Try other filters.
-            </p>
-          </div>
-        )
-      }}
-    </LanguageContext.Consumer>
-  )
-
-  renderLoadingView = () => (
+  const renderLoadingView = () => (
     <div data-testid="loader" className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
 
-  renderAllProducts = isDark => {
-    const {apiStatus} = this.state
-
+  const renderAllProducts = () => {
     switch (apiStatus) {
       case apiStatusConstants.success:
-        return this.renderProductsListView()
+        return renderProductsListView()
       case apiStatusConstants.failure:
-        return this.renderFailureView(isDark)
+        return renderFailureView()
       case apiStatusConstants.inProgress:
-        return this.renderLoadingView()
+        return renderLoadingView()
       default:
         return null
     }
   }
 
-  render() {
-    return (
-      <LanguageContext.Consumer>
-        {value => {
-          const {isDark} = value
-          return (
-            <LightDarkContainer data-testid="videoItemDetails" outline={isDark}>
-              <Header />
-              <div className="homeList">
-                <FiltersGroup />
-                {this.renderAllProducts(isDark)}
-              </div>
-            </LightDarkContainer>
-          )
-        }}
-      </LanguageContext.Consumer>
-    )
-  }
+  return (
+    <LightDarkContainer data-testid="videoItemDetails" outline={isDark}>
+      <Header />
+      <div className="homeList">
+        <FiltersGroup />
+        {renderAllProducts()}
+      </div>
+    </LightDarkContainer>
+  )
 }
 
 export default VideoPlayer
