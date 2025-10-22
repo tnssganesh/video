@@ -1,150 +1,125 @@
 import Cookies from 'js-cookie'
-import {useState, useEffect, useCallback, useContext} from 'react'
+import {Component} from 'react'
 import Loader from 'react-loader-spinner'
 import {FaFire} from 'react-icons/fa'
 import Header from '../Header'
-import VideoCard from '../VideoCard'
-import FiltersGroup from '../FiltersGroup'
-import LanguageContext from '../../context/LanguageContext'
-import {LightDarkContainer} from './styledComponents'
-import './index.css'
-
-const apiStatusConstants = {
-  initial: 'INITIAL',
-  success: 'SUCCESS',
-  failure: 'FAILURE',
+	@@ -16,20 +16,14 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-const Trending = () => {
-  const {isDark} = useContext(LanguageContext)
-  
-  const [productsList, setProductsList] = useState([])
-  const [apiStatus, setApiStatus] = useState(apiStatusConstants.initial)
+class Trending extends Component {
+  state = {
+    productsList: [],
+    apiStatus: apiStatusConstants.initial,
+  }
 
-  const getProducts = useCallback(async () => {
-    setApiStatus(apiStatusConstants.inProgress)
+  componentDidMount() {
+    this.getProducts()
+  }
+
+  getProducts = async () => {
+    this.setState({
+      apiStatus: apiStatusConstants.inProgress,
+    })
     const jwtToken = Cookies.get('jwt_token')
 
     const apiUrl = `https://apis.ccbp.in/videos/trending`
-    const options = {
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-      },
-      method: 'GET',
-    }
-    const response = await fetch(apiUrl, options)
-
-    if (response.ok) {
-      const fetchedData = await response.json()
-      const updatedData = fetchedData.videos.map(i => ({
-        id: i.id,
-        title: i.title,
-        thumbnailUrl: i.thumbnail_url,
-        channel: i.channel,
-        name: i.name,
+	@@ -52,19 +46,22 @@ class Trending extends Component {
         viewCount: i.view_count,
         publishedAt: i.published_at,
       }))
-      setProductsList(updatedData)
-      setApiStatus(apiStatusConstants.success)
+      this.setState({
+        productsList: updatedData,
+        apiStatus: apiStatusConstants.success,
+      })
+      // console.log(fetchedData)
     } else {
-      setApiStatus(apiStatusConstants.failure)
+      this.setState({
+        apiStatus: apiStatusConstants.failure,
+      })
     }
-  }, [])
-
-  useEffect(() => {
-    getProducts()
-  }, [getProducts])
-
-  const retry = () => {
-    getProducts()
   }
 
-  const renderFailureView = () => (
+  renderFailureView = isDark => (
     <div className="products-error-view-container">
       <img
         src={
-          isDark
-            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-dark-theme-img.png'
-            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png'
-        }
-        alt="failure view"
-        className="products-failure-img"
-      />
-      <h1 className="product-failure-heading-text">
-        Oops! Something Went Wrong
-      </h1>
-      <p className="products-failure-description">
+	@@ -82,20 +79,14 @@ class Trending extends Component {
         We are having some trouble processing your request. Please try again.
       </p>
 
-      <button onClick={retry} type="button">
+      <button onClick={this.retry} type="button">
         Retry
       </button>
     </div>
   )
 
-  const renderProductsListView = () => {
+  retry = () => {
+    this.getProducts()
+  }
+
+  renderProductsListView = () => {
+    const {productsList} = this.state
     const shouldShowProductsList = productsList.length > 0
+    // console.log(productsList)
     return shouldShowProductsList ? (
       <div className="all-products-container">
         <div>
-          <FaFire />
-          <h1>Trending</h1>
-        </div>
-        <ul className="products-list">
-          {productsList.map(product => (
-            <VideoCard video={product} key={product.id} />
-          ))}
-        </ul>
-      </div>
-    ) : (
-      <div className="no-products-view">
-        <img
-          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-no-search-results-img.png "
-          className="no-products-img"
-          alt="no videos"
-        />
-        <h1 className="no-products-heading">No Search results found</h1>
+	@@ -119,57 +110,41 @@ class Trending extends Component {
         <p className="no-products-description">
           Try different key words or remove search filter
         </p>
-        <button onClick={retry} type="button">
+        <button onClick={this.onRetry} type="button">
           Retry
         </button>
       </div>
     )
   }
 
-  const renderLoadingView = () => (
+  onRetry = () => {
+    this.getProducts()
+  }
+
+  renderLoadingView = () => (
     <div data-testid="loader" className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
 
-  const renderAllProducts = () => {
+  renderAllProducts = isDark => {
+    const {apiStatus} = this.state
+
     switch (apiStatus) {
       case apiStatusConstants.success:
-        return renderProductsListView()
+        return this.renderProductsListView()
       case apiStatusConstants.failure:
-        return renderFailureView()
+        return this.renderFailureView(isDark)
       case apiStatusConstants.inProgress:
-        return renderLoadingView()
+        return this.renderLoadingView()
       default:
         return null
     }
   }
 
-  return (
-    <LightDarkContainer data-testid="trending" outline={isDark}>
-      <Header />
-      <div className="homeList">
-        <FiltersGroup />
-        {renderAllProducts()}
-      </div>
-    </LightDarkContainer>
-  )
+  render() {
+    return (
+      <LanguageContext.Consumer>
+        {value => {
+          const {isDark} = value
+
+          return (
+            <LightDarkContainer data-testid="trending" outline={isDark}>
+              <Header />
+              <div className="homeList">
+                <FiltersGroup />
+                {this.renderAllProducts()}
+              </div>
+            </LightDarkContainer>
+          )
+        }}
+      </LanguageContext.Consumer>
+    )
+  }
 }
 
 export default Trending
