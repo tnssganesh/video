@@ -85,5 +85,6 @@ class FiltersGroup extends Component {
         }}
       </LanguageContext.Consumer>
     )
-  }}
+  }
+}
 export default FiltersGroup
