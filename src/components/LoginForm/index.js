@@ -26,7 +26,8 @@ class LoginForm extends Component {
 
     Cookies.set('jwt_token', jwtToken, {
       expires: 30,
-	@@ -31,13 +29,13 @@ class LoginForm extends Component {
+      path: '/',
+    })
     history.replace('/')
   }
 
@@ -40,7 +41,9 @@ class LoginForm extends Component {
     const userDetails = {username, password}
     const url = 'https://apis.ccbp.in/login'
     const options = {
-	@@ -47,78 +45,70 @@ class LoginForm extends Component {
+      method: 'POST',
+      body: JSON.stringify(userDetails),
+    }
     const response = await fetch(url, options)
     const data = await response.json()
     if (response.ok === true) {
@@ -116,3 +119,6 @@ class LoginForm extends Component {
       </div>
     )
   }
+}
+
+export default LoginForm
