@@ -1,5 +1,5 @@
 import {Route, Switch, Redirect} from 'react-router-dom'
-import {Component} from 'react'
+import {useState, useCallback, useMemo} from 'react'
 import LoginForm from './components/LoginForm'
 import Home from './components/Home'
 import Trending from './components/Trending'
@@ -12,59 +12,53 @@ import LanguageContext from './context/LanguageContext'
 
 import './App.css'
 
-class App extends Component {
-  state = {
-    isDark: false,
-    currentOption: 'Home',
-    savedList: [],
-  }
+const App = () => {
+  const [isDark, setIsDark] = useState(false)
+  const [currentOption, setCurrentOption] = useState('Home')
+  const [savedList, setSavedList] = useState([])
 
-  changeTheme = () => {
-    this.setState(pre => ({isDark: !pre.isDark}))
-  }
+  const changeTheme = useCallback(() => {
+    setIsDark(prevIsDark => !prevIsDark)
+  }, [])
 
-  changeOption = id => {
-    this.setState({currentOption: id})
-  }
+  const changeOption = useCallback(id => {
+    setCurrentOption(id)
+  }, [])
 
-  addToSave = item => {
-    const {savedList} = this.state
-    const savedIds = savedList.map(i => i.id)
-    if (savedIds.includes(item.id)) {
-      const upList = savedList.filter(i => i.id !== item.id)
-      this.setState({savedList: upList})
-    } else {
-      this.setState(pre => ({savedList: [...pre.savedList, item]}))
-    }
-  }
+  const addToSave = useCallback(item => {
+    setSavedList(prevSavedList => {
+      const savedIds = prevSavedList.map(i => i.id)
+      if (savedIds.includes(item.id)) {
+        return prevSavedList.filter(i => i.id !== item.id)
+      } else {
+        return [...prevSavedList, item]
+      }
+    })
+  }, [])
 
-  render() {
-    const {isDark, currentOption, savedList} = this.state
-    // console.log(savedList)
-    return (
-      <LanguageContext.Provider
-        value={{
-          isDark,
-          currentOption,
-          savedList,
-          changeOption: this.changeOption,
-          changeTheme: this.changeTheme,
-          addToSave: this.addToSave,
-        }}
-      >
-        <Switch>
-          <Route exact path="/login" component={LoginForm} />
-          <ProtectedRoute exact path="/" component={Home} />
-          <ProtectedRoute exact path="/trending" component={Trending} />
-          <ProtectedRoute exact path="/gaming" component={Gaming} />
-          <ProtectedRoute exact path="/saved-videos" component={SavedVideos} />
-          <ProtectedRoute exact path="/videos/:id" component={VideoPlayer} />
-          <Route exact path="/not-found" component={NotFound} />
-          <Redirect to="not-found" />
-        </Switch>
-      </LanguageContext.Provider>
-    )
-  }
+  const contextValue = useMemo(() => ({
+    isDark,
+    currentOption,
+    savedList,
+    changeOption,
+    changeTheme,
+    addToSave,
+  }), [isDark, currentOption, savedList, changeOption, changeTheme, addToSave])
+
+  return (
+    <LanguageContext.Provider value={contextValue}>
+      <Switch>
+        <Route exact path="/login" component={LoginForm} />
+        <ProtectedRoute exact path="/" component={Home} />
+        <ProtectedRoute exact path="/trending" component={Trending} />
+        <ProtectedRoute exact path="/gaming" component={Gaming} />
+        <ProtectedRoute exact path="/saved-videos" component={SavedVideos} />
+        <ProtectedRoute exact path="/videos/:id" component={VideoPlayer} />
+        <Route exact path="/not-found" component={NotFound} />
+        <Redirect to="/not-found" />
+      </Switch>
+    </LanguageContext.Provider>
+  )
 }
 
 export default App
