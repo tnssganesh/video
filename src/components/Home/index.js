@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 
-import {Component} from 'react'
+import {useState, useEffect, useCallback, useContext} from 'react'
 import Loader from 'react-loader-spinner'
 
 import {BsSearch} from 'react-icons/bs'
@@ -19,25 +19,17 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
-class Home extends Component {
-  state = {
-    productsList: [],
-    apiStatus: apiStatusConstants.initial,
-    isClose: false,
+const Home = () => {
+  const {isDark} = useContext(LanguageContext)
 
-    searchInput: '',
-  }
+  const [productsList, setProductsList] = useState([])
+  const [apiStatus, setApiStatus] = useState(apiStatusConstants.initial)
+  const [isClose, setIsClose] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
 
-  componentDidMount() {
-    this.getProducts()
-  }
-
-  getProducts = async () => {
-    this.setState({
-      apiStatus: apiStatusConstants.inProgress,
-    })
+  const getProducts = useCallback(async () => {
+    setApiStatus(apiStatusConstants.inProgress)
     const jwtToken = Cookies.get('jwt_token')
-    const {searchInput} = this.state
 
     const apiUrl = `https://apis.ccbp.in/videos/all?search=${searchInput}`
     const options = {
@@ -56,23 +48,25 @@ class Home extends Component {
         thumbnailUrl: i.thumbnail_url,
         channel: i.channel,
         name: i.name,
-
         viewCount: i.view_count,
         publishedAt: i.published_at,
       }))
-      this.setState({
-        productsList: updatedData,
-        apiStatus: apiStatusConstants.success,
-      })
-      // console.log(fetchedData)
+      setProductsList(updatedData)
+      setApiStatus(apiStatusConstants.success)
     } else {
-      this.setState({
-        apiStatus: apiStatusConstants.failure,
-      })
+      setApiStatus(apiStatusConstants.failure)
     }
+  }, [searchInput]) // Re-run fetch when searchInput changes
+
+  useEffect(() => {
+    getProducts()
+  }, [getProducts]) // Initial fetch and re-fetch when getProducts (and thus searchInput) changes
+
+  const retry = () => {
+    getProducts()
   }
 
-  renderFailureView = isDark => (
+  const renderFailureView = () => (
     <div className="products-error-view-container">
       <img
         src={
@@ -90,23 +84,17 @@ class Home extends Component {
         We are having some trouble processing your request. Please try again.
       </p>
 
-      <button onClick={this.retry} type="button">
+      <button onClick={retry} type="button">
         Retry
       </button>
     </div>
   )
 
-  retry = () => {
-    this.getProducts()
-  }
-
-  renderProductsListView = () => {
-    const {productsList} = this.state
+  const renderProductsListView = () => {
     const shouldShowProductsList = productsList.length > 0
-    // console.log(productsList)
     return shouldShowProductsList ? (
       <div className="all-products-container">
-        {this.renderSearchInput()}
+        {renderSearchInput()}
 
         <ul className="products-list">
           {productsList.map(product => (
@@ -125,60 +113,58 @@ class Home extends Component {
         <p className="no-products-description">
           Try different key words or remove search filter
         </p>
-        <button onClick={this.onRetry} type="button">
+        <button onClick={retry} type="button">
           Retry
         </button>
       </div>
     )
   }
 
-  onRetry = () => {
-    this.getProducts()
-  }
-
-  renderLoadingView = () => (
+  const renderLoadingView = () => (
     <div data-testid="loader" className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
 
-  renderAllProducts = isDark => {
-    const {apiStatus} = this.state
-
+  const renderAllProducts = () => {
     switch (apiStatus) {
       case apiStatusConstants.success:
-        return this.renderProductsListView()
+        return renderProductsListView()
       case apiStatusConstants.failure:
-        return this.renderFailureView(isDark)
+        return renderFailureView()
       case apiStatusConstants.inProgress:
-        return this.renderLoadingView()
+        return renderLoadingView()
       default:
         return null
     }
   }
 
-  onEnterSearchInput = event => {
+  const onEnterSearchInput = event => {
     if (event.key === 'Enter') {
-      this.getProducts()
+      searchVideo()
     }
   }
 
-  onChangeSearchInput = event => {
-    this.setState({searchInput: event.target.value})
+  const onChangeSearchInput = event => {
+    setSearchInput(event.target.value)
   }
 
-  renderSearchInput = () => (
+  const searchVideo = () => {
+    getProducts()
+  }
+
+  const renderSearchInput = () => (
     <div className="search-input-container">
       <input
-        value={this.searchInput}
+        value={searchInput}
         type="search"
         className="search-input"
         placeholder="Search"
-        onChange={this.onChangeSearchInput}
-        onKeyDown={this.onEnterSearchInput}
+        onChange={onChangeSearchInput}
+        onKeyDown={onEnterSearchInput}
       />
       <button
-        onClick={this.searchVideo}
+        onClick={searchVideo}
         type="button"
         data-testid="searchButton"
       >
@@ -187,65 +173,48 @@ class Home extends Component {
     </div>
   )
 
-  searchVideo = () => {
-    this.getProducts()
-  }
+  const coloseClicked = () => setIsClose(true)
 
-  renderBanner = () => {
-    const {isClose} = this.state
-    return (
-      !isClose && (
-        <BannerContainer
-          data-testid="banner"
-          outlin="https://assets.ccbp.in/frontend/react-js/nxt-watch-banner-bg.png"
+  const renderBanner = () => (
+    !isClose && (
+      <BannerContainer
+        data-testid="banner"
+        outlin="https://assets.ccbp.in/frontend/react-js/nxt-watch-banner-bg.png"
+      >
+        <img
+          className="website-logo"
+          src={
+            isDark
+              ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
+              : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
+          }
+          alt="nxt watch logo"
+        />
+        <p>Buy Nxt Watch Premium plans</p>
+        <button type="button">GET IT NOW</button>
+        <button
+          data-testid="close"
+          onClick={coloseClicked}
+          type="button"
         >
-          <img
-            className="website-logo"
-            src={
-              false
-                ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
-                : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
-            }
-            alt="nxt watch logo"
-          />
-          <p>Buy Nxt Watch Premium plans</p>
-          <button type="button">GET IT NOW</button>
-          <button
-            data-testid="close"
-            onClick={this.coloseClicked}
-            type="button"
-          >
-            <IoMdClose />.
-          </button>
-        </BannerContainer>
-      )
+          <IoMdClose />.
+        </button>
+      </BannerContainer>
     )
-  }
+  )
 
-  coloseClicked = () => this.setState({isClose: true})
-
-  render() {
-    return (
-      <LanguageContext.Consumer>
-        {value => {
-          const {isDark} = value
-
-          return (
-            <LightDarkContainer data-testid="home" outline={isDark}>
-              <Header />
-              <div className="homeList">
-                <FiltersGroup />
-                <div>
-                  {this.renderBanner()}
-                  {this.renderAllProducts(isDark)}
-                </div>
-              </div>
-            </LightDarkContainer>
-          )
-        }}
-      </LanguageContext.Consumer>
-    )
-  }
+  return (
+    <LightDarkContainer data-testid="home" outline={isDark}>
+      <Header />
+      <div className="homeList">
+        <FiltersGroup />
+        <div>
+          {renderBanner()}
+          {renderAllProducts()}
+        </div>
+      </div>
+    </LightDarkContainer>
+  )
 }
 
 export default Home
